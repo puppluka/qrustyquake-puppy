@@ -23,10 +23,11 @@ void VID_CalcScreenDimensions(cvar_t *cvar);
 void VID_AllocBuffers();
 void VID_VidFullscreenCommand_f();
 
-extern SDL_AudioStream *stream;
+extern SDL_AudioStream *q_audio_stream;
 
 // Place near the top of vid_sdl.c
 #include "pl_mpeg_sdl3.h"
+#include <SDL3/SDL_audio.h>
 
 void VID_PlayVideoCommand_f()
 {
@@ -34,10 +35,16 @@ void VID_PlayVideoCommand_f()
         Con_Printf("usage: playvideo <filename.mpg>\n");
         return;
     }
-
-    // Pass the default playback constant directly
+    if (q_audio_stream) {
+        SDL_UnbindAudioStream(q_audio_stream);
+        SDL_ClearAudioStream(q_audio_stream);
+    }
+    CDAudio_Pause();
     PLM_PlayVideo(Cmd_Argv(1), renderer, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
-
+    CDAudio_Resume();
+    if (q_audio_stream) {
+        SDL_BindAudioStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, q_audio_stream);
+    }
     SDL_SetRenderLogicalPresentation(renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
     VID_CalcScreenDimensions(0);
 }
