@@ -6,6 +6,7 @@
 // based on implementations found in the quakeforge and ioquake3 projects.
 #include "quakedef.h"
 
+SDL_AudioStream *q_audio_stream = NULL;
 static s32 buffersize;
 
 static void SDLCALL paint_audio(SDL_UNUSED void *unused, Uint8 *stream, s32 len)
@@ -95,8 +96,8 @@ bool SNDDMA_Init(dma_t *dma)
 		Con_Printf("Failed allocating memory for SDL audio\n");
 		return 0;
 	}
-	SDL_AudioStream *stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &desired, paint_audio_new, 0);
-	SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(stream));
+	q_audio_stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &desired, paint_audio_new, 0);
+	SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(q_audio_stream));
 	return 1;
 }
 

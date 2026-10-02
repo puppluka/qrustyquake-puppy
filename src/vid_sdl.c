@@ -1,6 +1,6 @@
 #include "quakedef.h"
 
-static SDL_Renderer *renderer;
+SDL_Renderer *renderer;
 static SDL_Surface *argbbuffer;
 static SDL_Texture *texture;
 static SDL_Rect blitRect;
@@ -22,6 +22,32 @@ static s32 scalemode;
 void VID_CalcScreenDimensions(cvar_t *cvar);
 void VID_AllocBuffers();
 void VID_VidFullscreenCommand_f();
+
+extern SDL_AudioStream *q_audio_stream;
+
+// Place near the top of vid_sdl.c
+#include "pl_mpeg_sdl3.h"
+#include <SDL3/SDL_audio.h>
+
+void VID_PlayVideoCommand_f()
+{
+    if (Cmd_Argc() != 2) {
+        Con_Printf("usage: playvideo <filename.mpg>\n");
+        return;
+    }
+    if (q_audio_stream) {
+        SDL_UnbindAudioStream(q_audio_stream);
+        SDL_ClearAudioStream(q_audio_stream);
+    }
+    CDAudio_Pause();
+    PLM_PlayVideo(Cmd_Argv(1), renderer, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
+    CDAudio_Resume();
+    if (q_audio_stream) {
+        SDL_BindAudioStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, q_audio_stream);
+    }
+    SDL_SetRenderLogicalPresentation(renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
+    VID_CalcScreenDimensions(0);
+}
 
 s32 VID_GetConfigCvar(const c8 *cvname)
 {
@@ -152,6 +178,7 @@ void VID_Init(SDL_UNUSED u8 *palette)
 	Cvar_SetCallback(&realwidth, vid_callback);
 	Cvar_SetCallback(&realheight, vid_callback);
 	Cvar_SetCallback(&scr_uiscale, VID_UpdateUIScale);
+	Cmd_AddCommand("playvideo", VID_PlayVideoCommand_f);
 	Cmd_AddCommand("vid_fullscreen", VID_VidFullscreenCommand_f);
 	// Set up display mode (width and height)
 	vid.width = 320;
