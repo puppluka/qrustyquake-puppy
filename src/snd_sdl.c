@@ -8,6 +8,7 @@
 
 SDL_AudioStream *q_audio_stream = NULL;
 static s32 buffersize;
+volatile bool snd_cinematic_muted = false;
 
 static void SDLCALL paint_audio(SDL_UNUSED void *unused, Uint8 *stream, s32 len)
 {
@@ -40,14 +41,18 @@ static void SDLCALL paint_audio(SDL_UNUSED void *unused, Uint8 *stream, s32 len)
 
 void SDLCALL paint_audio_new(void *userdata, SDL_AudioStream *stream, s32 additional_amount, SDL_UNUSED s32 total_amount)
 {
-	if (additional_amount > 0) {
-		Uint8 *data = SDL_stack_alloc(Uint8, additional_amount);
-		if (data) {
-			paint_audio(userdata, data, additional_amount);
-			SDL_PutAudioStreamData(stream, data, additional_amount);
-			SDL_stack_free(data);
-		}
-	}
+    if (additional_amount > 0) {
+        Uint8 *data = SDL_stack_alloc(Uint8, additional_amount);
+        if (data) {
+            if (snd_cinematic_muted) {
+                memset(data, 0, additional_amount);
+            } else {
+                paint_audio(userdata, data, additional_amount);
+            }
+            SDL_PutAudioStreamData(stream, data, additional_amount);
+            SDL_stack_free(data);
+        }
+    }
 }
 
 bool SNDDMA_Init(dma_t *dma)

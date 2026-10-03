@@ -24,6 +24,7 @@ void VID_AllocBuffers();
 void VID_VidFullscreenCommand_f();
 
 extern SDL_AudioStream *q_audio_stream;
+extern volatile bool snd_cinematic_muted;
 
 // Place near the top of vid_sdl.c
 #include "pl_mpeg_sdl3.h"
@@ -36,14 +37,14 @@ void VID_PlayVideoCommand_f()
         return;
     }
     if (q_audio_stream) {
-        SDL_UnbindAudioStream(q_audio_stream);
+        snd_cinematic_muted = true;
         SDL_ClearAudioStream(q_audio_stream);
     }
     CDAudio_Pause();
     PLM_PlayVideo(Cmd_Argv(1), renderer, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
     CDAudio_Resume();
     if (q_audio_stream) {
-        SDL_BindAudioStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, q_audio_stream);
+        snd_cinematic_muted = false;
     }
     SDL_SetRenderLogicalPresentation(renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
     VID_CalcScreenDimensions(0);
