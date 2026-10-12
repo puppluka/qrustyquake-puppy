@@ -226,7 +226,6 @@ s32 UDP_GetSocketPort(struct qsockaddr *addr);
 s32 UDP_SetSocketPort(struct qsockaddr *addr, s32 port);
 void W_LoadWadFile();                                                   // wad.h
 void *W_GetLumpName(const c8 *name);
-void SwapPic(qpic_t *pic);
 EX vec3_t r_origin, vpn, vright, vup;                                // render.h
 void R_Init();
 void R_InitTextures();
@@ -601,12 +600,6 @@ EX c8 key_lines[32][MAXCMDLINE];
 EX s32 edit_line;
 EX s32 key_linepos;
 EX bool team_message;
-EX s16(*BigShort) (s16 l);
-EX s16(*LittleShort) (s16 l);
-EX s32(*BigLong) (s32 l);
-EX s32(*LittleLong) (s32 l);
-EX f32(*BigFloat) (f32 l);
-EX f32(*LittleFloat) (f32 l);
 size_t UTF8_FromQuake(c8 *dst, size_t maxbytes, const c8 *src);
 const c8 *COM_SkipSpace (const c8 *str);
 void Host_WriteConfiguration();

@@ -114,7 +114,6 @@ qpic_t *Draw_CachePic(c8 *path)
 	dat = (qpic_t *) pic->cache.data;
 	if(!dat)
 		Sys_Error("Draw_CachePic: failed to load %s", path);
-	SwapPic(dat);
 	return dat;
 }
 
@@ -125,7 +124,6 @@ qpic_t *Draw_TryCachePic(c8 *path)
 		Con_DPrintf("Draw_TryCachePic: failed to load %s\n", path);
 		return NULL;
 	}
-	SwapPic(dat);
 	return dat;
 }
 
@@ -497,10 +495,10 @@ void Draw_ConsoleBackground(s32 lines)
 
 void R_DrawRect(vrect_t *prect, s32 rowbytes, u8 *psrc)
 {
-	u8 *pdest = (u8*)scrbuffs[drawlayer]->pixels + (prect->y * vid.width) + prect->x;
-	u64 maxdest = (u64)(u64)scrbuffs[drawlayer]->pixels+vid.width*vid.height;
+	u8 *pdest=(u8*)scrbuffs[drawlayer]->pixels+prect->y*vid.width+prect->x;
+	u64 maxdest = (u64)scrbuffs[drawlayer]->pixels+vid.width*vid.height;
 	for(s32 i = 0; i < prect->height; i++){
-		if((u64)(u64)pdest+prect->width > maxdest) break;
+		if((u64)pdest+prect->width > maxdest) break;
 		memcpy(pdest, psrc, prect->width);
 		psrc += rowbytes;
 		pdest += vid.width;
